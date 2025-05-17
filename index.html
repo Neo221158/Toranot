@@ -1,174 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Upload and Name Selection</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-
-        .container {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #555;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-
-        input[type="file"] {
-            width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-top: 0.5rem;
-        }
-
-        .preview-container {
-            margin: 1rem 0;
-            padding: 1rem;
-            border: 1px dashed #ddd;
-            border-radius: 4px;
-            text-align: center;
-        }
-
-        .preview-container img {
-            max-width: 100%;
-            max-height: 300px;
-            object-fit: contain;
-        }
-
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 1rem 2rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-            width: 100%;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        .status {
-            margin-top: 1rem;
-            padding: 1rem;
-            border-radius: 4px;
-            display: none;
-        }
-
-        .success {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .error {
-            background-color: #ffebee;
-            color: #c62828;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>תורנויות</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      direction: rtl;
+      text-align: center;
+      padding: 2rem;
+    }
+    input, button {
+      font-size: 1rem;
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+    }
+    #status {
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Upload Image and Select Name</h1>
-        <form id="uploadForm">
-            <div class="form-group">
-                <label for="name">Enter Name:</label>
-                <input type="text" id="name" name="name" required placeholder="Enter the name to search for">
-            </div>
 
-            <div class="form-group">
-                <label for="image">Upload Image:</label>
-                <input type="file" id="image" name="image" accept="image/*" required>
-            </div>
+  <h1>העלאת תורנות לרופא</h1>
 
-            <div class="preview-container" id="imagePreview">
-                <p>No image selected</p>
-            </div>
+  <form id="upload-form">
+    <label for="name">שם לרופא:</label><br>
+    <input type="text" name="name" id="name" placeholder="למשל: גדות" required><br><br>
 
-            <button type="submit">Extract Dates and Create Events</button>
-        </form>
+    <label for="image">העלאת תמונה:</label><br>
+    <input type="file" name="image" id="image" accept="image/*" required><br><br>
 
-        <div class="status" id="statusMessage"></div>
-    </div>
+    <button type="submit">שלח</button>
+  </form>
 
-    <script>
-        const form = document.getElementById('uploadForm');
-        const imageInput = document.getElementById('image');
-        const imagePreview = document.getElementById('imagePreview');
-        const statusMessage = document.getElementById('statusMessage');
+  <div id="status"></div>
 
-        imageInput.addEventListener('change', handleImageUpload);
-        form.addEventListener('submit', handleSubmit);
+  <script>
+    const form = document.getElementById('upload-form');
+    const status = document.getElementById('status');
 
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-                };
-                reader.readAsDataURL(file);
-            }
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.textContent = 'שולח...';
+
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch('http://localhost:5678/webhook/calendar', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          status.textContent = 'התורנויות הוזנו בהצלחה!';
+        } else {
+          status.textContent = 'שגיאה בשליחה: ' + response.statusText;
         }
+      } catch (err) {
+        console.error(err);
+        status.textContent = 'אירעה שגיאה בחיבור לשרת.';
+      }
+    });
+  </script>
 
-        async function handleSubmit(event) {
-            event.preventDefault();
-            const formData = new FormData(form);
-
-            try {
-                statusMessage.style.display = 'block';
-                statusMessage.className = 'status';
-                statusMessage.textContent = 'Processing...';
-
-                const response = await fetch('http://localhost:5678/webhook/61ede979-ed4d-4624-92c1-3a52c0211a56/calendar', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to process request');
-                }
-
-                const data = await response.json();
-                statusMessage.className = 'status success';
-                statusMessage.textContent = 'Successfully created calendar events!';
-            } catch (error) {
-                statusMessage.className = 'status error';
-                statusMessage.textContent = `Error: ${error.message}`;
-            }
-        }
-    </script>
 </body>
 </html>

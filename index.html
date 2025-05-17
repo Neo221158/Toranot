@@ -64,6 +64,15 @@
             text-align: center;
             padding: 20px;
         }
+        .help-text {
+            font-size: 12px;
+            color: #666;
+        }
+        .debug-info {
+            margin-top: 10px;
+            color: #666;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -99,19 +108,45 @@
             resultDiv.innerHTML = '<p class="loading">Processing your request...</p>';
             
             try {
+                // Log the request data for debugging
+                console.log('Sending request with data:', {
+                    name: formData.get('name'),
+                    image: formData.get('image')
+                });
+                
                 const response = await fetch('http://localhost:5678/webhook-test/calendar', {
                     method: 'POST',
                     body: formData
                 });
                 
-                if (!response.ok) {
-                    throw new Error('Request failed');
-                }
+                // Log the response status
+                console.log('Response status:', response.status);
                 
-                const result = await response.json();
-                resultDiv.innerHTML = '<p class="success">Processing complete! Check your Google Calendar for the new events.</p>';
+                // Get response text
+                const text = await response.text();
+                
+                // Log the raw response
+                console.log('Raw response:', text);
+                
+                // Try to parse as JSON if possible
+                try {
+                    const result = JSON.parse(text);
+                    console.log('Parsed response:', result);
+                    resultDiv.innerHTML = '<p class="success">Processing complete! Check your Google Calendar for the new events.</p>';
+                } catch (e) {
+                    console.error('Error parsing JSON:', e);
+                    if (text) {
+                        resultDiv.innerHTML = '<p class="success">Processing complete! Check your Google Calendar for the new events.</p>';
+                    } else {
+                        throw new Error('Empty response received');
+                    }
+                }
             } catch (error) {
+                console.error('Error:', error);
                 resultDiv.innerHTML = '<p class="error">Error: ' + error.message + '</p>';
+                if (error.stack) {
+                    resultDiv.innerHTML += '<div class="debug-info">Error details: ' + error.stack + '</div>';
+                }
             } finally {
                 // Reset button
                 button.disabled = false;

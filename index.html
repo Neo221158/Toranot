@@ -2,14 +2,14 @@
 <html lang="he">
 <head>
   <meta charset="UTF-8">
-  <title>העלאת תורנויות</title>
+  <title>מערכת תורנויות</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       direction: rtl;
       text-align: center;
       padding: 2rem;
-      background: #f9f9f9;
+      background: #f0f0f0;
     }
     input, button {
       font-size: 1rem;
@@ -19,22 +19,21 @@
     #status {
       margin-top: 1rem;
       font-weight: bold;
-      color: #333;
     }
   </style>
 </head>
 <body>
 
-  <h1>מערכת תורנויות</h1>
+  <h1>העלאת תורנויות</h1>
 
   <form id="upload-form" enctype="multipart/form-data">
     <label for="name">שם הרופא/ה:</label><br>
     <input type="text" name="name" id="name" placeholder="למשל: גדות" required><br><br>
 
-    <label for="image">תמונה של התורנות:</label><br>
+    <label for="image">בחר תמונה של התורנות:</label><br>
     <input type="file" name="image" id="image" accept="image/*" required><br><br>
 
-    <button type="submit">שליחה</button>
+    <button type="submit">שלח</button>
   </form>
 
   <div id="status"></div>
@@ -50,20 +49,20 @@
       const formData = new FormData(form);
 
       try {
-        const response = await fetch('https://yourname.n8n.cloud/webhook/calendar', {
+        const response = await fetch('http://localhost:5678/webhook/calendar', {
           method: 'POST',
           body: formData
         });
 
         if (response.ok) {
-          status.textContent = 'התורנויות נוספו בהצלחה!';
+          status.textContent = '🎉 התורנויות הוזנו בהצלחה!';
         } else {
-          const errorText = await response.text();
-          status.textContent = 'שגיאה: ' + errorText;
+          const err = await response.text();
+          status.textContent = '⚠️ שגיאה מהשרת: ' + err;
         }
       } catch (err) {
         console.error(err);
-        status.textContent = 'שגיאה בחיבור לשרת.';
+        status.textContent = '❌ שגיאה בחיבור לשרת.';
       }
     });
   </script>

@@ -49,16 +49,16 @@
       const formData = new FormData(form);
 
       try {
-        const response = await fetch('http://localhost:5678/webhook/calendar', {
+        const response = await fetch('https://YOUR_NGROK_URL_HERE.ngrok.io/webhook/calendar', {
           method: 'POST',
           body: formData
         });
 
         if (response.ok) {
-          status.textContent = '🎉 התורנויות הוזנו בהצלחה!';
+          status.textContent = '🎉 התורנויות נשלחו בהצלחה!';
         } else {
           const err = await response.text();
-          status.textContent = '⚠️ שגיאה מהשרת: ' + err;
+          status.textContent = '⚠️ שגיאה: ' + err;
         }
       } catch (err) {
         console.error(err);

@@ -2,19 +2,34 @@
 <html lang="he">
 <head>
   <meta charset="UTF-8">
-  <title>תורנויות</title>
+  <title>העלאת תורנויות</title>
   <style>
-    body { font-family: sans-serif; direction: rtl; text-align: center; padding: 2em; }
-    input, button { margin: 1em; padding: 0.6em; font-size: 1em; }
+    body {
+      font-family: sans-serif;
+      direction: rtl;
+      text-align: center;
+      padding: 2em;
+      background: #f8f8f8;
+    }
+    input, button {
+      margin: 1em;
+      padding: 0.6em;
+      font-size: 1em;
+    }
+    #status {
+      margin-top: 1em;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
-  <h1>העלאת תורנות</h1>
+
+  <h1>📅 העלאת תורנות לרופא/ה</h1>
 
   <form id="form" enctype="multipart/form-data">
-    <input type="text" name="name" placeholder="הכנס/י שם (למשל: גדות)" required><br>
+    <input type="text" name="name" placeholder="לדוגמה: גדות" required><br>
     <input type="file" name="image" accept="image/*" required><br>
-    <button type="submit">🚀 העלאה ושליחה</button>
+    <button type="submit">🚀 שלח</button>
   </form>
 
   <div id="status"></div>
@@ -25,18 +40,24 @@
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      status.innerText = "שולח...";
+      status.innerText = "⏳ שולח...";
 
       const formData = new FormData(form);
 
-      const res = await fetch("https://YOUR-N8N-URL-HERE/webhook/calendar", {
-        method: "POST",
-        body: formData
-      });
+      try {
+        const res = await fetch("https://neoneo2211.app.n8n.cloud/webhook-test/calendar", {
+          method: "POST",
+          body: formData
+        });
 
-      const txt = await res.text();
-      status.innerText = txt;
+        const text = await res.text();
+        status.innerText = text || "✅ נשלח בהצלחה!";
+      } catch (err) {
+        console.error(err);
+        status.innerText = "❌ שגיאה בשליחה לשרת.";
+      }
     });
   </script>
+
 </body>
 </html>
